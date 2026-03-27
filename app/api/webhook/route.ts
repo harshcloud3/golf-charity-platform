@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
+export const dynamic = 'force-dynamic';
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -14,30 +16,17 @@ export async function POST(request: Request) {
     
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      const supabase = createClient();
+      const supabase = await createClient();
       
-      // Try to get user from metadata
-      let userId = session.metadata?.user_id;
-      
-      // If no userId, find by email
-      if (!userId && session.customer_email) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("email", session.customer_email)
-          .single();
-        
-        if (profile) {
-          userId = profile.id;
-        }
-      }
+      const userId = session.metadata?.user_id;
       
       if (userId) {
         await supabase
           .from("profiles")
           .update({ subscription_status: "active" })
           .eq("id", userId);
-        console.log("✅ Activated subscription for:", userId);
+        
+        console.log("✅ Subscription activated for user:", userId);
       }
     }
     
