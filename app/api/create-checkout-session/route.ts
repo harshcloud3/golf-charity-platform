@@ -2,14 +2,15 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
+export const dynamic = 'force-dynamic';
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: Request) {
   try {
     const { priceId, userId, email } = await request.json();
-    const supabase = createClient();
+    const supabase = await createClient();
 
-    // Get or create Stripe customer
     let customerId;
     const { data: profile } = await supabase
       .from("profiles")
@@ -34,7 +35,6 @@ export async function POST(request: Request) {
         .eq("id", userId);
     }
 
-    // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ["card"],
