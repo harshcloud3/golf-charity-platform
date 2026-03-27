@@ -13,18 +13,10 @@ export const createClient = async () => {
           return cookieStore.get(name)?.value
         },
         set(name: string, value: string, options: any) {
-          try {
-            cookieStore.set(name, value, options)
-          } catch (error) {
-            // Handle error
-          }
+          cookieStore.set(name, value, options)
         },
         remove(name: string, options: any) {
-          try {
-            cookieStore.set(name, '', { ...options, maxAge: 0 })
-          } catch (error) {
-            // Handle error
-          }
+          cookieStore.set(name, '', { ...options, maxAge: 0 })
         },
       },
     }
