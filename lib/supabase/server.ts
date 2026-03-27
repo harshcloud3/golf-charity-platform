@@ -16,7 +16,7 @@ export const createClient = async () => {
           cookieStore.set(name, value, options)
         },
         remove(name: string, options: any) {
-          cookieStore.set(name, '', { ...options, maxAge: 0 })
+          cookieStore.set(name, '', options)
         },
       },
     }
